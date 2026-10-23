@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Leta — Learning the Autoregressive</title>
+<meta name="description" content="Leta: direct score-difference estimation with amortized future credit for few-step autoregressive video distillation.">
+<meta name="author" content="Zixuan Duan, Yabo Chen, Xunzhi Xiang, Xin Zhang, Haibin Huang, Yin Chen, Chi Zhang, Qi Fan">
+<meta name="color-scheme" content="light dark">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Leta — Learning the Autoregressive">
+<meta property="og:description" content="Direct score-difference estimation with amortized future credit for video distillation.">
+<meta property="og:image" content="assets/concept.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="styles.css">
+<script>
+  // Apply the stored theme before first paint to avoid a flash.
+  try{var t=localStorage.getItem('leta-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}
+</script>
+</head>
+<body>
+
+<a class="skip-link" href="#results">Skip to results</a>
+
+<header class="site-header" id="top">
+  <div class="shell nav">
+    <a class="brand" href="#top"><span class="brand-mark">L</span><span>Leta</span></a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#results">Results</a>
+      <a href="#method">Method</a>
+      <a href="#abstract">Abstract</a>
+      <a href="#paper">Paper</a>
+    </nav>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.4M12 19.2v2.4M2.4 12h2.4M19.2 12h2.4M5.2 5.2l1.7 1.7M17.1 17.1l1.7 1.7M18.8 5.2l-1.7 1.7M6.9 17.1l-1.7 1.7" stroke-linecap="round"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.3A8.6 8.6 0 1 1 9.7 3.5a7 7 0 0 0 10.8 10.8Z" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ hero ============ -->
+<section class="hero">
+  <div class="shell hero-inner">
+    <p class="badge"><i></i>Project page · video distillation</p>
+
+    <h1 class="hero-title">Learning the <em>Autoregressive</em></h1>
+    <p class="hero-sub">Direct Score-Difference Estimation with Amortized Future Credit for Video Distillation</p>
+    <p class="hero-lede">Leta fuses a directly-learned local correction with cross-chunk future credit into one teacher-guided update field, produced in a single estimator forward pass at generator update time.</p>
+
+    <p class="authors">
+      <span><b>Zixuan Duan</b><sup>1,2,†</sup></span>
+      <span><b>Yabo Chen</b><sup>2,†</sup></span>
+      <span><b>Xunzhi Xiang</b><sup>1,2,†</sup></span>
+      <span>Xin Zhang<sup>2,3</sup></span>
+      <span>Haibin Huang<sup>2</sup></span>
+      <span>Yin Chen<sup>2</sup></span>
+      <span>Chi Zhang<sup>2,*</sup></span>
+      <span>Qi Fan<sup>1,*</sup></span>
+    </p>
+    <p class="affil">
+      <span><sup>1</sup>Nanjing University</span>
+      <span><sup>2</sup>Institute of Artificial Intelligence, China Telecom (TeleAI)</span>
+      <span><sup>3</sup>Fudan University</span>
+    </p>
+    <p class="note"><sup>†</sup>Co-first authors &nbsp;&nbsp;<sup>*</sup>Corresponding authors</p>
+
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#results">
+        View video results
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5v15M5.5 13l6.5 6.5L18.5 13" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <!-- TODO: on arXiv release, set href to the abs URL and drop data-pending. -->
+      <a class="btn btn-ghost is-pending" href="" data-pending aria-disabled="true" role="link">
+        Paper coming soon
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6V12l3 2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+
+    <dl class="metrics">
+      <div class="metric">
+        <dt>Visual quality</dt>
+        <dd>0.604<small>+0.34</small><span class="sub">VideoAlign VQ · DMD 0.261</span></dd>
+      </div>
+      <div class="metric">
+        <dt>Motion quality</dt>
+        <dd>0.579<small>+0.38</small><span class="sub">VideoAlign MQ · DMD 0.197</span></dd>
+      </div>
+      <div class="metric">
+        <dt>Denoising steps</dt>
+        <dd>4<span class="sub">per generated chunk</span></dd>
+      </div>
+      <div class="metric">
+        <dt>Teacher cost at update</dt>
+        <dd>0<span class="sub">estimator training only</span></dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<!-- ============ results ============ -->
+<section class="section" id="results">
+  <div class="shell">
+    <div class="section-head">
+      <p class="eyebrow">Video results</p>
+      <h2>One prompt. Two update fields.</h2>
+      <p>Twenty matched prompts from the shared evaluation set, each generated under the same seed, rollout procedure, and four-step sampling schedule. Leta sits beside the DMD baseline for a direct temporal comparison.</p>
+    </div>
+
+    <div class="toolbar">
+      <div class="key">
+        <span><i class="leta"></i>Leta <small>ours</small></span>
+        <span><i class="dmd"></i>DMD <small>baseline</small></span>
+      </div>
+      <p class="toolbar-hint">Videos play when scrolled into view · open a card for the full prompt and a larger view</p>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<!-- ============ method ============ -->
+<section class="section" id="method">
+  <div class="shell">
+    <div class="section-head">
+      <p class="eyebrow dmd-dot">Method</p>
+      <h2>From a local gap to future-aware credit.</h2>
+      <p>DMD reconstructs the full student score before subtracting it from the teacher's. Leta learns the gap itself, then lets the next chunk send credit back to the current one — both from a single shared estimator.</p>
+    </div>
+
+    <figure class="figure">
+      <div class="figure-bar"><b>Concept</b><span>Two signals, one update field</span></div>
+      <img src="assets/concept.png" width="2642" height="1031" alt="Left: estimating the full student score and subtracting it from the teacher score yields a larger gap error than predicting the gap directly. Right: conventional training ignores the future chunk's influence, while Leta adds a future-credit term to the local correction." loading="lazy" decoding="async">
+      <figcaption><strong>Direct gap prediction, plus future credit.</strong> Learning the teacher–student residual directly avoids reconstructing two full scores before subtracting them, which lowers the gap error at fixed capacity. On the right, detached-history training drops the current chunk's influence on later chunks; FutureCredit restores it as an additive term.</figcaption>
+    </figure>
+
+    <div class="cards-2">
+      <article class="concept a">
+        <div class="concept-top">
+          <span class="concept-num">01</span>
+          <span class="concept-tag">local correction</span>
+        </div>
+        <h3>ScoreDelta</h3>
+        <p>Rather than learning the student score and subtracting it from the teacher score, Leta regresses the teacher–student denoising residual directly. At the population optimum this recovers the same score difference DMD uses, up to a known timestep scaling; under a fixed-feature rank budget it can reach strictly lower approximation error when the residual is simpler to represent than the student denoiser.</p>
+        <p class="eq"><span>update</span><b>≈ ∇<sub>k</sub></b></p>
+      </article>
+
+      <article class="concept b">
+        <div class="concept-top">
+          <span class="concept-num">02</span>
+          <span class="concept-tag">cross-chunk credit</span>
+        </div>
+        <h3>FutureCredit</h3>
+        <p>Detaching the generated history hides how the current chunk shapes everything after it, and backpropagating the full rollout costs too much memory. Leta replays the next chunk's final denoising step and takes a vector–Jacobian product against the next-chunk teacher residual, giving a learnable target that carries that influence backward.</p>
+        <p class="eq"><span>update</span><b>= ∇<sub>k</sub> + λ C<sub>k</sub></b></p>
+      </article>
+    </div>
+
+    <figure class="figure">
+      <div class="figure-bar"><b>Training loop</b><span>Generator updates · estimator updates</span></div>
+      <img src="assets/method.png" width="2363" height="910" alt="Leta's two alternating phases. Left: the generator combines the frozen joint estimator's ScoreDelta correction and FutureCredit credit. Right: the estimator learns both fields from teacher residuals and next-chunk VJP targets." loading="lazy" decoding="async">
+      <figcaption><strong>One estimator pass per generator update.</strong> The two phases alternate: the shared bidirectional estimator learns both fields under complementary supervision from teacher residuals and next-chunk VJP targets, then the frozen estimator supplies the fused direction. Teacher evaluations and credit VJPs appear only in estimator training, so generator updates carry no extra teacher cost.</figcaption>
+    </figure>
+
+    <figure class="figure" style="margin-top:20px">
+      <div class="figure-bar"><b>Toy study</b><span>Matched parameter budget</span></div>
+      <img src="assets/spiral.png" width="3015" height="627" alt="Three spiral score fields: the target, the result of estimating the student score and subtracting, and the result of predicting the difference directly, which stays closest to the target." loading="lazy" decoding="async">
+      <figcaption><strong>Shared structure cancels.</strong> On a fixed-density spiral with matched trainable parameters, predicting the score difference directly (c) preserves the target geometry (a) far better than estimating the student score and subtracting it from the teacher score (b).</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ abstract ============ -->
+<section class="section" id="abstract">
+  <div class="shell">
+    <div class="abstract-card">
+      <p class="eyebrow">Abstract</p>
+      <p>Few-step distillation for autoregressive (AR) video generation commonly first initializes an AR student and then refines it with DMD. This refinement process faces two challenges. First, although initialization already yields a reasonably capable student, DMD obtains the refinement direction indirectly by estimating the full student score before forming the teacher–student correction. Second, detached-history training prevents the generator from assigning credit to a current chunk for its influence on subsequent chunks.</p>
+      <p>We introduce Leta, a few-step distillation framework that addresses these challenges with <strong class="sd">ScoreDelta</strong> and <strong class="fc">FutureCredit</strong>. ScoreDelta directly estimates the teacher–student correction from denoising residuals, while FutureCredit learns an auxiliary cross-chunk update signal from vector–Jacobian products (VJPs) of next-chunk teacher residuals. Leta combines these signals into a joint teacher-guided update field in a single forward pass during generator updates. Teacher evaluations and credit VJPs are used only for estimator training.</p>
+      <p>For ScoreDelta, we establish population equivalence to score-difference estimation and a conditional approximation advantage under limited capacity in a fixed-feature linear model. In our controlled experiments, Leta improves over DMD by <strong>0.9</strong> points on VBench and <strong>0.66</strong> on VideoAlign. This advantage persists at a higher generator update frequency (G:E = 1:1), where Leta improves over DMD by <strong>1.6</strong> on VBench and <strong>0.35</strong> on VideoAlign.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ paper ============ -->
+<section class="section" id="paper">
+  <div class="shell">
+    <div class="paper-row">
+      <div>
+        <p class="eyebrow">Paper</p>
+        <h2>Learning the Autoregressive</h2>
+        <p>Direct Score-Difference Estimation with Amortized Future Credit for Video Distillation</p>
+      </div>
+      <div class="paper-actions">
+        <!-- TODO: on arXiv release, set href to the abs URL and drop data-pending. -->
+        <a class="btn btn-primary is-pending" href="" data-pending aria-disabled="true" role="link">
+          Paper coming soon
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6V12l3 2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a class="btn btn-ghost" href="#top">
+          Back to top
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19.5v-15M5.5 11 12 4.5 18.5 11" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="cite">
+      <div class="cite-bar">
+        <b>BibTeX</b>
+        <button class="copy-btn" id="copy-cite" type="button" data-label="Copy">Copy</button>
+      </div>
+      <pre id="cite-text">@article{duan2026leta,
+  title   = {Learning the Autoregressive: Direct Score-Difference Estimation
+             with Amortized Future Credit for Video Distillation},
+  author  = {Duan, Zixuan and Chen, Yabo and Xiang, Xunzhi and Zhang, Xin and
+             Huang, Haibin and Chen, Yin and Zhang, Chi and Fan, Qi},
+  year    = {2026}
+}</pre>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer shell">
+  <span>Leta · autoregressive video distillation</span>
+  <span>Project materials for research discussion</span>
+</footer>
+
+<!-- ============ modal ============ -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+  <div class="modal-scrim" data-close></div>
+  <div class="modal-panel" role="document">
+    <button class="modal-close" type="button" data-close aria-label="Close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/></svg>
+    </button>
+    <p class="eyebrow">Matched comparison</p>
+    <h2 id="modal-title"></h2>
+    <p id="modal-prompt"></p>
+    <div class="modal-pair">
+      <figure class="m-leta">
+        <figcaption><i></i>Leta <em>ours</em></figcaption>
+        <video id="modal-leta" controls muted loop playsinline preload="none"></video>
+      </figure>
+      <figure class="m-dmd">
+        <figcaption><i></i>DMD <em>baseline</em></figcaption>
+        <video id="modal-dmd" controls muted loop playsinline preload="none"></video>
+      </figure>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
